@@ -47,27 +47,8 @@
 - (BOOL)application:(UIApplication *)application swizzledDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self application:application swizzledDidFinishLaunchingWithOptions:launchOptions];
 
-    if (![FIRApp defaultApp]) {
-        [FIRApp configure];
-    }
-
-    // Get the path for Google-Service-Info.plist
-    //NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
-
-    // Init FIRApp passing the file
-    //FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
-    //[FIRApp configureWithOptions: options];
-
     // [START set_messaging_delegate]
     [FIRMessaging messaging].delegate = self;
-    // [END set_messaging_delegate]
-    //#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-    //self.delegate = [UNUserNotificationCenter currentNotificationCenter].delegate;
-        //[UNUserNotificationCenter currentNotificationCenter].delegate = self;
-        //#endif
-
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tokenRefreshNotification:)
-                                                 //name:kFIRInstanceIDTokenRefreshNotification object:nil];
 
    // Register for remote notifications. This shows a permission dialog on first run, to
    // show the dialog at a more appropriate time move this registration accordingly.
@@ -94,9 +75,16 @@
 
    [application registerForRemoteNotifications];
 
+   // Get the path for Google-Service-Info.plist
+   NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
+
+   // Init FIRApp passing the file
+   FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
+   [FIRApp configureWithOptions: options];
+
     self.applicationInBackground = @(YES);
     return YES;
-      }
+  }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [self connectToFcm];
