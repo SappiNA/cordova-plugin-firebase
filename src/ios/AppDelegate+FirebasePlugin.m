@@ -47,30 +47,54 @@
 - (BOOL)application:(UIApplication *)application swizzledDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     [self application:application swizzledDidFinishLaunchingWithOptions:launchOptions];
 
-    //if (![FIRApp defaultApp]) {
-        //[FIRApp configure];
-    //}
+    if (![FIRApp defaultApp]) {
+        [FIRApp configure];
+    }
 
     // Get the path for Google-Service-Info.plist
-    NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
+    //NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
 
     // Init FIRApp passing the file
-    FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
-    [FIRApp configureWithOptions: options];
+    //FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
+    //[FIRApp configureWithOptions: options];
 
     // [START set_messaging_delegate]
     [FIRMessaging messaging].delegate = self;
     // [END set_messaging_delegate]
-#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-    self.delegate = [UNUserNotificationCenter currentNotificationCenter].delegate;
-        [UNUserNotificationCenter currentNotificationCenter].delegate = self;
-#endif
+    //#if defined(__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+    //self.delegate = [UNUserNotificationCenter currentNotificationCenter].delegate;
+        //[UNUserNotificationCenter currentNotificationCenter].delegate = self;
+        //#endif
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tokenRefreshNotification:)
-                                                 name:kFIRInstanceIDTokenRefreshNotification object:nil];
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tokenRefreshNotification:)
+                                                 //name:kFIRInstanceIDTokenRefreshNotification object:nil];
+
+   // Register for remote notifications. This shows a permission dialog on first run, to
+   // show the dialog at a more appropriate time move this registration accordingly.
+   // [START register_for_notifications]
+   if ([UNUserNotificationCenter class] != nil) {
+     // iOS 10 or later
+     // For iOS 10 display notification (sent via APNS)
+     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+     UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
+         UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+     [[UNUserNotificationCenter currentNotificationCenter]
+         requestAuthorizationWithOptions:authOptions
+         completionHandler:^(BOOL granted, NSError * _Nullable error) {
+           // ...
+         }];
+   } else {
+     // iOS 10 notifications aren't available; fall back to iOS 8-9 notifications.
+     UIUserNotificationType allNotificationTypes =
+     (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
+     UIUserNotificationSettings *settings =
+     [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
+     [application registerUserNotificationSettings:settings];
+   }
+
+   [application registerForRemoteNotifications];
 
     self.applicationInBackground = @(YES);
-
     return YES;
       }
 
