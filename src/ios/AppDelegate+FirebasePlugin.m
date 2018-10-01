@@ -50,38 +50,38 @@
     // [START set_messaging_delegate]
     [FIRMessaging messaging].delegate = self;
 
-   // Register for remote notifications. This shows a permission dialog on first run, to
-   // show the dialog at a more appropriate time move this registration accordingly.
-   // [START register_for_notifications]
-   if ([UNUserNotificationCenter class] != nil) {
-     // iOS 10 or later
-     // For iOS 10 display notification (sent via APNS)
-     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
-     UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
-         UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
-     [[UNUserNotificationCenter currentNotificationCenter]
-         requestAuthorizationWithOptions:authOptions
-         completionHandler:^(BOOL granted, NSError * _Nullable error) {
-           // ...
-         }];
-   } else {
-     // iOS 10 notifications aren't available; fall back to iOS 8-9 notifications.
-     UIUserNotificationType allNotificationTypes =
-     (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
-     UIUserNotificationSettings *settings =
-     [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
-     [application registerUserNotificationSettings:settings];
-   }
+     // Register for remote notifications. This shows a permission dialog on first run, to
+     // show the dialog at a more appropriate time move this registration accordingly.
+     // [START register_for_notifications]
+     if ([UNUserNotificationCenter class] != nil) {
+       // iOS 10 or later
+       // For iOS 10 display notification (sent via APNS)
+       [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+       UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
+           UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+       [[UNUserNotificationCenter currentNotificationCenter]
+           requestAuthorizationWithOptions:authOptions
+           completionHandler:^(BOOL granted, NSError * _Nullable error) {
+             // ...
+           }];
+     } else {
+       // iOS 10 notifications aren't available; fall back to iOS 8-9 notifications.
+       UIUserNotificationType allNotificationTypes =
+       (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
+       UIUserNotificationSettings *settings =
+       [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
+       [application registerUserNotificationSettings:settings];
+     }
 
-   [application registerForRemoteNotifications];
+    [application registerForRemoteNotifications];
 
-   // Get the path for Google-Service-Info.plist
-   NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
+    // Get the path for Google-Service-Info.plist
+    //NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
 
-   // Init FIRApp passing the file
-   FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
-   [FIRApp configureWithOptions: options];
-
+    // Init FIRApp passing the file
+    //FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
+    //[FIRApp configureWithOptions: options];
+    [FIRApp configure];
     self.applicationInBackground = @(YES);
     return YES;
   }
@@ -121,10 +121,10 @@
     }];
 }
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+/*- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     [FIRMessaging messaging].APNSToken = deviceToken;
     NSLog(@"deviceToken1 = %@", deviceToken);
-}
+}*/
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     NSDictionary *mutableUserInfo = [userInfo mutableCopy];
@@ -137,7 +137,7 @@
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+/*- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
     fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
 
     NSDictionary *mutableUserInfo = [userInfo mutableCopy];
@@ -147,7 +147,19 @@
     NSLog(@"%@", mutableUserInfo);
     completionHandler(UIBackgroundFetchResultNewData);
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
+}*/
+
+// [START refresh_token]
+- (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken {
+    NSLog(@"FCM registration token: %@", fcmToken);
+    // Notify about received token.
+    NSDictionary *dataDict = [NSDictionary dictionaryWithObject:fcmToken forKey:@"token"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:
+     @"FCMToken" object:nil userInfo:dataDict];
+    // TODO: If necessary send token to application server.
+    // Note: This callback is fired at each app startup and whenever a new token is generated.
 }
+// [END refresh_token]
 
 // [START ios_10_data_message]
 // Receive data messages on iOS 10+ directly from FCM (bypassing APNs) when the app is in the foreground.
