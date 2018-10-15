@@ -75,12 +75,6 @@
 
     [application registerForRemoteNotifications];
 
-    // Get the path for Google-Service-Info.plist
-    //NSString * filePath =[[NSBundle mainBundle] pathForResource:@"GoogleService-Info" ofType: @"plist"];
-
-    // Init FIRApp passing the file
-    //FIROptions * options =[[FIROptions alloc] initWithContentsOfFile: filePath];
-    //[FIRApp configureWithOptions: options];
     [FIRApp configure];
     self.applicationInBackground = @(YES);
     return YES;
@@ -121,11 +115,6 @@
     }];
 }
 
-/*- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    [FIRMessaging messaging].APNSToken = deviceToken;
-    NSLog(@"deviceToken1 = %@", deviceToken);
-}*/
-
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
     NSDictionary *mutableUserInfo = [userInfo mutableCopy];
 
@@ -136,18 +125,6 @@
 
     [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
 }
-
-/*- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
-    fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
-
-    NSDictionary *mutableUserInfo = [userInfo mutableCopy];
-
-    [mutableUserInfo setValue:self.applicationInBackground forKey:@"tap"];
-    // Print full message.
-    NSLog(@"%@", mutableUserInfo);
-    completionHandler(UIBackgroundFetchResultNewData);
-    [FirebasePlugin.firebasePlugin sendNotification:mutableUserInfo];
-}*/
 
 // [START refresh_token]
 - (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken {
